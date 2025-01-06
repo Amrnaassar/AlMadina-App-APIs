@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("./middlewares/authMiddleware");
-const User = require("./models/user"); // استخدام المسار الصحيح
 const userapi = require("./apis/userapi");
 const categoryapi = require("./apis/categoryapi");
 const productapi = require("./apis/productapi");
@@ -52,6 +51,12 @@ app.post('/sendNotification', (req, res) => {
       res.status(500).send('Failed to send notification');
     });
 });
+
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
 
 
 
