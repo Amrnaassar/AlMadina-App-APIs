@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authMiddleware");
-const User = require("../models/user");
+const User = require("../models/User");
 const { JWT_SECRET } = require("../config");
 
 const nodemailer = require("nodemailer");
