@@ -4,6 +4,7 @@ const Product = require("../models/Orders"); // استدعاء موديل الم
 const Order = require("../models/Orders");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
+const nodemailer = require("nodemailer");
 
 module.exports = (app) => {
 
@@ -18,6 +19,25 @@ module.exports = (app) => {
         userAddress,
         userPhone,
       });
+      
+       const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: "alfanarofficial102@gmail.com", // بريد المرسل
+              pass: "czpq ivco hmgr acjv",     // استخدام كلمة مرور التطبيق
+            },
+          });
+      
+          // إرسال البريد الإلكتروني
+          await transporter.sendMail({
+            from: "alfanarofficial102@gmail.com",
+            to: "almadinamarket102@gmail.com",
+            subject: "New order",
+            text: `New order User ID : ${userId}
+             User phone : ${userPhone}
+             Order Adress : ${userAddress}
+             Total price : ${totalPrice}`,
+          });
 
       const savedOrder = await newOrder.save();
       res.status(201).json(savedOrder);
