@@ -89,7 +89,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       res.status(201).json({
         message: "File uploaded successfully!",
         fileId: uploadStream.id,
-        fileUrl: `http://localhost:3000/file/${uploadStream.id}`,
+        fileUrl: `https://almadina-app-apis.onrender.com/file/${uploadStream.id}`,
       });
     });
 
