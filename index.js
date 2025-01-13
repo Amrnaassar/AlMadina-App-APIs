@@ -135,7 +135,7 @@ mongoose
 // إضافة وظيفة Ping للحفاظ على التطبيق نشطًا
 setInterval(() => {
   https
-    .get("https://almadina-app-apis.onrender.com", (res) => {
+    .get("https://almadina-app-apis.onrender.com/api/products", (res) => {
       console.log(`Pinged self: Status Code: ${res.statusCode}`);
     })
     .on("error", (err) => {
