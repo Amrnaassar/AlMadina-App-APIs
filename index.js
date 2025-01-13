@@ -10,52 +10,53 @@ const orderapi = require("./apis/orderapi");
 const notificationapi = require("./apis/notificationapi");
 
 const Ads = require("./apis/adsapi");
-const cors = require('cors');
+const cors = require("cors");
 const multer = require("multer");
 const { GridFSBucket } = require("mongodb"); // استيراد GridFSBucket بشكل صحيح
 
-const admin = require('firebase-admin');
-const bodyParser = require('body-parser');
+const admin = require("firebase-admin");
+const bodyParser = require("body-parser");
+const redis = require("redis");
+const client = redis.createClient();
 
+const https = require("https"); // لإرسال طلبات Ping
 
 const app = express();
 
 app.use(express.json());
 
-const serviceAccount = require('./almadian-firebase-adminsdk-3ex6g-6df2997c6f.json');
+const serviceAccount = require("./almadian-firebase-adminsdk-3ex6g-6df2997c6f.json");
 
 // تهيئة Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+////////////////live ////////////////
 
 // Endpoint لإرسال الإشعار إلى جميع المستخدمين
-app.post('/sendNotification', (req, res) => {
+app.post("/sendNotification", (req, res) => {
   const message = {
     notification: {
       title: req.body.title,
       body: req.body.body,
     },
-    topic: 'allUsers',  // يتم إرسال الإشعار لجميع المستخدمين المسجلين في هذا الموضوع
+    topic: "allUsers", // يتم إرسال الإشعار لجميع المستخدمين المسجلين في هذا الموضوع
   };
 
   // إرسال الإشعار لجميع المستخدمين
-  admin.messaging().send(message)
+  admin
+    .messaging()
+    .send(message)
     .then((response) => {
-      console.log('Successfully sent message:', response);
-      res.status(200).send('Notification sent successfully!');
+      console.log("Successfully sent message:", response);
+      res.status(200).send("Notification sent successfully!");
     })
     .catch((error) => {
-      console.error('Error sending message:', error);
-      res.status(500).send('Failed to send notification');
+      console.error("Error sending message:", error);
+      res.status(500).send("Failed to send notification");
     });
 });
-
-
-
-
-
 
 notificationapi(app);
 // ==========Endpoints========
@@ -76,7 +77,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
   try {
     const db = mongoose.connection.db; // استخدام اتصال MongoDB
-    const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
+    const bucket = new GridFSBucket(db, { bucketName: "uploads" });
 
     const uploadStream = bucket.openUploadStream(req.file.originalname, {
       contentType: req.file.mimetype,
@@ -85,7 +86,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     // استخدام stream بدلاً من buffer
     uploadStream.end(req.file.buffer);
 
-    uploadStream.on('finish', () => {
+    uploadStream.on("finish", () => {
       res.status(201).json({
         message: "File uploaded successfully!",
         fileId: uploadStream.id,
@@ -93,46 +94,54 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       });
     });
 
-    uploadStream.on('error', (err) => {
+    uploadStream.on("error", (err) => {
       res.status(500).json({ error: err.message });
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // استرجاع الصورة باستخدام ID
-
-
 app.get("/file/image/:id", async (req, res) => {
-    try {
-      const db = mongoose.connection.db;
-      const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
-  
-      // التأكد من استخدام ObjectId بشكل صحيح
-      const fileId = new mongoose.Types.ObjectId(req.params.id);
-  
-      const downloadStream = bucket.openDownloadStream(fileId);
-  
-      downloadStream.pipe(res);
-  
-      downloadStream.on('error', (err) => {
-        res.status(404).send("File not found.");
-      });
-  
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+  try {
+    const db = mongoose.connection.db;
+    const bucket = new GridFSBucket(db, { bucketName: "uploads" });
+
+    // التأكد من استخدام ObjectId بشكل صحيح
+    const fileId = new mongoose.Types.ObjectId(req.params.id);
+
+    const downloadStream = bucket.openDownloadStream(fileId);
+
+    downloadStream.pipe(res);
+
+    downloadStream.on("error", (err) => {
+      res.status(404).send("File not found.");
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // إعداد الاتصال بقاعدة البيانات MongoDB
-const uri ="mongodb+srv://nassar73:amr10299@cluster0.067hm.mongodb.net/mydb?retryWrites=true&w=majority";
+const uri =
+  "mongodb+srv://nassar73:amr10299@cluster0.067hm.mongodb.net/mydb?retryWrites=true&w=majority";
 
 mongoose
   .connect(uri)
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
+
+// إضافة وظيفة Ping للحفاظ على التطبيق نشطًا
+setInterval(() => {
+  https
+    .get("https://almadina-app-apis.onrender.com", (res) => {
+      console.log(`Pinged self: Status Code: ${res.statusCode}`);
+    })
+    .on("error", (err) => {
+      console.error("Ping error:", err.message);
+    });
+}, 5 * 60 * 1000); // كل 5 دقائق
 
 // تشغيل السيرفر
 app.listen(3000, () => {
