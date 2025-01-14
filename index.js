@@ -127,10 +127,20 @@ app.get("/file/image/:id", async (req, res) => {
 const uri =
   "mongodb+srv://nassar73:amr10299@cluster0.067hm.mongodb.net/mydb?retryWrites=true&w=majority";
 
-mongoose
-  .connect(uri)
+
+  mongoose.connect(uri)
   .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+  .catch((error) => console.log("MongoDB connection error:", error));
+
+// مراقبة حالات الاتصال
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.warn("MongoDB disconnected. Retrying...");
+  mongoose.connect(uri);
+});
 
 // إضافة وظيفة Ping للحفاظ على التطبيق نشطًا
 setInterval(() => {
@@ -145,6 +155,6 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 // تشغيل السيرفر
-app.listen(process.env.PORT, () => {
+app.listen(PORT, () => {
   console.log('Server is running on port '+PORT);
 });
