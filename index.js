@@ -124,7 +124,7 @@ app.get("/file/image/:id", async (req, res) => {
 });
 
 // إعداد الاتصال بقاعدة البيانات MongoDB
-const uri =
+const uri = process.env.MONGO_URI ||
   "mongodb+srv://nassar73:amr10299@cluster0.067hm.mongodb.net/mydb?retryWrites=true&w=majority";
 
 
