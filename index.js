@@ -8,22 +8,22 @@ const categoryapi = require("./apis/categoryapi");
 const productapi = require("./apis/productapi");
 const orderapi = require("./apis/orderapi");
 const notificationapi = require("./apis/notificationapi");
-
 const Ads = require("./apis/adsapi");
 const cors = require("cors");
 const multer = require("multer");
 const { GridFSBucket } = require("mongodb"); // استيراد GridFSBucket بشكل صحيح
-
 const admin = require("firebase-admin");
 const bodyParser = require("body-parser");
 const redis = require("redis");
 const client = redis.createClient();
-
 const https = require("https"); // لإرسال طلبات Ping
+const  compression =require("compression")
 
 const app = express();
-
 app.use(express.json());
+app.use(cors());
+app.use(compression());
+const PORT = process.env.PORT || 3000;
 
 const serviceAccount = require("./almadian-firebase-adminsdk-3ex6g-6df2997c6f.json");
 
@@ -31,7 +31,7 @@ const serviceAccount = require("./almadian-firebase-adminsdk-3ex6g-6df2997c6f.js
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
+ 
 ////////////////live ////////////////
 
 // Endpoint لإرسال الإشعار إلى جميع المستخدمين
@@ -153,7 +153,6 @@ setInterval(() => {
     });
 }, 5 * 60 * 1000); // كل 5 دقائق
 
-const PORT = process.env.PORT || 3000;
 // تشغيل السيرفر
 app.listen(PORT, () => {
   console.log('Server is running on port '+PORT);
