@@ -16,7 +16,6 @@ const admin = require("firebase-admin");
 const bodyParser = require("body-parser");
 const redis = require("redis");
 const client = redis.createClient();
-const https = require("https"); // لإرسال طلبات Ping
 const  compression =require("compression")
 
 const app = express();
@@ -123,7 +122,6 @@ app.get("/file/image/:id", async (req, res) => {
   }
 });
 
-// إعداد الاتصال بقاعدة البيانات MongoDB
 const uri = process.env.MONGO_URI ||
   "mongodb+srv://nassar73:amr10299@cluster0.067hm.mongodb.net/mydb?retryWrites=true&w=majority";
 
@@ -132,7 +130,6 @@ const uri = process.env.MONGO_URI ||
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log("MongoDB connection error:", error));
 
-// مراقبة حالات الاتصال
 mongoose.connection.on("error", (err) => {
   console.error("MongoDB error:", err);
 });
