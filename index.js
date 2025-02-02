@@ -142,17 +142,6 @@ mongoose.connection.on("disconnected", () => {
   mongoose.connect(uri);
 });
 
-// إضافة وظيفة Ping للحفاظ على التطبيق نشطًا
-setInterval(() => {
-  https
-    .get("https://almadina-app-apis.onrender.com/api/products", (res) => {
-      console.log(`Pinged self: Status Code: ${res.statusCode}`);
-    })
-    .on("error", (err) => {
-      console.error("Ping error:", err.message);
-    });
-}, 5 * 60 * 1000); // كل 5 دقائق
-
 // تشغيل السيرفر
 app.listen(PORT, () => {
   console.log('Server is running on port '+PORT);
