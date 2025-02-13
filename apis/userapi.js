@@ -9,6 +9,27 @@ const speakeasy = require("speakeasy");
 let otpStore = {}; 
 
 module.exports = (app) => {
+
+  app.get("/api/users/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+  
+      // البحث عن المستخدم عن طريق الـ ID
+      const user = await User.findById(userId);
+  
+      // التحقق مما إذا كان المستخدم موجودًا أم لا
+      if (!user) {
+        return res.status(404).json({ message: "المستخدم غير موجود" });
+      }
+  
+      // إرجاع بيانات المستخدم بدون كلمة المرور للحفاظ على الأمان
+      const { password, ...userData } = user.toObject();
+      res.status(200).json(userData);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
   // إضافة مستخدم جديد (Create)
   app.post("/api/users/register", async (req, res) => {
     try {
