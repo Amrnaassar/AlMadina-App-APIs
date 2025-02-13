@@ -142,6 +142,33 @@ module.exports = (app) => {
       res.status(500).json({ message: error.message });
     }
   });
+  
+  app.put("/api/orders/:orderId/status", async (req, res) => {
+    try {
+        const { status } = req.body; // الحالة الجديدة من الطلب
+        const { orderId } = req.params;
+
+        // التحقق من صحة الحالة
+        if (!["pending", "completed", "cancelled"].includes(status)) {
+            return res.status(400).json({ message: "Invalid status value" });
+        }
+
+        // تحديث الطلب
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        res.status(200).json({ message: "Order status updated", order: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 
 };
